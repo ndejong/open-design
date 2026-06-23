@@ -41,24 +41,16 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/od
+          images: ghcr.io/${{ github.repository_owner }}/open-design
           # spec §15.1 tag scheme:
           #   - vX.Y.Z push             → :X.Y.Z + :latest
           #   - workflow_call (stable)  → :<release_version> + optional :latest
@@ -74,7 +66,7 @@ jobs:
           context: .
           file: deploy/Dockerfile
           # spec §15.1 — multi-arch single manifest
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           # Tags and release workflow calls publish.
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
